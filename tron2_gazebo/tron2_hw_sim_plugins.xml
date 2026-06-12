@@ -1,0 +1,9 @@
+<library path="lib/libtron2_hw_sim">
+    <class
+            name="tron2_gazebo/Tron2HWSim" type="tron2_gazebo::Tron2HWSim"
+            base_class_type="gazebo_ros_control::RobotHWSim">
+        <description>
+            TRON2 biped robot Gazebo simulation interface providing HybridJointInterface and IMU.
+        </description>
+    </class>
+</library>
