@@ -1,92 +1,168 @@
-# tron2-gazebo-ros
+# TRON2 ROS 工作区说明（`~/limx_ws/src`）
 
+本目录是 TRON2 在 ROS Noetic 下的源码空间（catkin `src`），包含仿真侧与控制侧两类包。
 
+## 1. 目录结构
 
-## Getting started
+当前建议结构如下：
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
+```text
+~/limx_ws/src
+├── CMakeLists.txt                 # catkin 顶层入口（通常为软链接）
+├── robot-description              # 机器人模型描述包（独立放在 src 一级）
+├── limxsdk-lowlevel               # 低层 SDK 包（独立放在 src 一级）
+├── tron2-gazebo-ros               # 仿真相关包集合
+│   ├── limxsdk-sim
+│   └── tron2_gazebo
+└── tron2-rl-deploy-ros            # 控制/部署相关包集合
+    ├── onnxruntime_sdk
+    ├── robot_common
+    ├── tron2_controllers
+    └── tron2_hw
 ```
-cd existing_repo
-git remote add origin http://gitlab-gitlab-ce1/rhys/tron2-gazebo-ros.git
-git branch -M master
-git push -uf origin master
+
+> 注意：catkin 支持递归发现包，因此子目录分组不会影响编译，只要每个 ROS 包内有合法 `package.xml` 与 `CMakeLists.txt`。
+
+## 2. 环境要求
+
+- Ubuntu 20.04
+- ROS Noetic（建议 `ros-noetic-desktop-full`）
+- Gazebo 11（ROS Noetic 默认）
+- 常见依赖（按需补齐）：
+
+```bash
+sudo apt-get update
+sudo apt-get install -y \
+  ros-noetic-gazebo-ros-pkgs \
+  ros-noetic-gazebo-ros-control \
+  ros-noetic-ros-control \
+  ros-noetic-ros-controllers \
+  ros-noetic-controller-manager \
+  ros-noetic-joint-state-controller \
+  ros-noetic-rqt-controller-manager \
+  ros-noetic-robot-state-publisher \
+  libeigen3-dev
 ```
 
-## Integrate with your tools
+## 3. 创建工作空间
 
-- [ ] [Set up project integrations](http://gitlab-gitlab-ce1/rhys/tron2-gazebo-ros/-/settings/integrations)
+可以按照以下步骤，创建一个算法开发工作空间：
 
-## Collaborate with your team
+- 打开一个 Bash 终端。
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+- 创建一个新目录来存放工作空间。例如，可以在用户的主目录下创建一个名为“limx_ws”的目录：
 
-## Test and Deploy
+  ```
+  mkdir -p ~/limx_ws/src
+  ```
 
-Use the built-in continuous integration in GitLab.
+- 下载运动控制开发接口：
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+  ```
+  cd ~/limx_ws/src
+  git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
+  ```
 
-***
+- 下载 Gazebo 仿真器：
 
-# Editing this README
+  ```
+  cd ~/limx_ws/src
+  git clone https://github.com/limxdynamics/tron1-gazebo-ros.git
+  ```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+- 下载机器人模型描述文件
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+  ```
+  cd ~/limx_ws/src
+  git clone https://github.com/limxdynamics/robot-description.git
+  ```
+在工作区根目录执行：
 
-## Name
-Choose a self-explaining name for your project.
+```bash
+cd ~/limx_ws
+source /opt/ros/noetic/setup.bash
+catkin_make
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+编译成功后建议加载环境：
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```bash
+source ~/limx_ws/devel/setup.bash
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## 4. 运行示例
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### 4.1 启动仿真（完整部署）
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```bash
+cd ~/limx_ws
+source /opt/ros/noetic/setup.bash
+source devel/setup.bash
+# 启动包含 Gazebo 场景、硬件节点和控制器的完整仿真
+roslaunch tron2_hw tron2_hw_sim.launch robot_type:=SF_TRON2A
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+`robot_type` 可按你的配置切换（例如 `SF_TRON2A` / `WF_TRON2A`）。
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### 4.2 仅启动控制器（仿真模式）
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+如果你已经手动启动了 Gazebo 场景，可以只启动硬件节点和控制器：
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+```bash
+roslaunch tron2_hw tron2_controller_sim.launch robot_type:=SF_TRON2A
+```
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### 4.3 实物部署
 
-## License
-For open source projects, say how it is licensed.
+```bash
+roslaunch tron2_hw tron2_hw.launch robot_type:=SF_TRON2A robot_ip:=10.192.1.2
+```
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## 5. 仿真与实机逻辑说明（重要）
+
+结论：**核心控制链路逻辑一致**，都是：
+
+- `tron2_hw_node`（`Tron2HW`） -> `RobotHWLoop` -> `controller_manager` -> `tron2_controller`
+
+但两者有输入侧差异：
+
+- 仿真（`tron2_hw_sim.launch`）默认还会发 `/cmd_vel` 和 `/tron2_controller/set_mode`。
+- 实机（`tron2_hw.launch`）主要走 SDK 订阅的通道。
+
+## 6. 控制参数位置
+
+主要控制参数位于：
+
+- `tron2-rl-deploy-ros/tron2_controllers/config/SF_TRON2A/params.yaml`
+- `tron2-rl-deploy-ros/tron2_controllers/config/WF_TRON2A/params.yaml`
+
+## 7. 效果展示
+
+### 7.1 仿真部署
+
+![SF Gazebo](doc/sfgazebo-ezgif.com-video-to-gif-converter.gif)
+![WF Gazebo](doc/wfgazebo.gif)
+
+### 7.2 实机部署
+
+实机部署时请悬挂启动控制器
+
+![Deploy](doc/deploy.jpg)
+
+![SF](doc/sf.GIF)
+![WF](doc/wf.GIF)
+
+## 8. 常见问题
+
+- 启动时报找不到包：
+  - 确认已执行 `source /opt/ros/noetic/setup.bash`
+  - 确认已执行 `source ~/limx_ws/devel/setup.bash`
+- 修改目录后编译异常：
+  - 在 `~/limx_ws` 下重新执行 `catkin_make`
+- Gazebo 插件/控制器加载失败：
+  - 先确认 `tron2_gazebo`、`tron2_hw`、`tron2_controllers`均已成功编译
+
+## 6. License
+
+[Apache 2.0](../tron2-rl-deploy-ros/LICENSE)
