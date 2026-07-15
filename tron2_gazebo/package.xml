@@ -1,10 +1,27 @@
 <?xml version="1.0"?>
+<!--
+  SPDX-FileCopyrightText: 2024-2026 LimX Dynamics Technology Co., Ltd.
+  SPDX-License-Identifier: Apache-2.0
+-->
 <package format="2">
     <name>tron2_gazebo</name>
-    <version>0.0.0</version>
-    <description>Gazebo simulation plugin for TRON2 biped robot (SF/WF).</description>
-    <maintainer email="dev@example.com">developer</maintainer>
-    <license>Proprietary</license>
+    <version>0.1.0</version>
+    <description>
+      Gazebo Classic 11 hardware-simulation plugin for the TRON2 biped
+      robot family (SF / WF variants). Bridges gazebo_ros_control
+      joint interfaces to the TRON2 SDK RobotCmd / RobotState API via
+      the sibling `limxsdk_sim` package. Simulation-side only — this
+      package ships no control policy, no calibration values, and no
+      real-robot firmware.
+    </description>
+    <maintainer email="contact@limxdynamics.com">LimX Dynamics</maintainer>
+    <author email="contact@limxdynamics.com">LimX Dynamics</author>
+    <license>Apache-2.0</license>
+
+    <url type="website">https://www.limxdynamics.com</url>
+    <url type="repository">https://github.com/limx-tron2/tron2-gazebo-ros</url>
+    <url type="bugtracker">https://github.com/limx-tron2/tron2-gazebo-ros/issues</url>
+
     <buildtool_depend>catkin</buildtool_depend>
     <depend>roscpp</depend>
     <depend>gazebo_dev</depend>

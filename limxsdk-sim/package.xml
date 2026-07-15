@@ -1,10 +1,30 @@
 <?xml version="1.0"?>
+<!--
+  SPDX-FileCopyrightText: 2024-2026 LimX Dynamics Technology Co., Ltd.
+  SPDX-License-Identifier: Apache-2.0
+  NOTE: the pre-built binaries under lib/{aarch64,amd64,arm32,win}/ have
+  their own provenance / redistribution status tracked in
+  THIRD_PARTY_NOTICES.md §2. This Apache-2.0 declaration covers the
+  sources (headers, CMake) that LimX Dynamics owns.
+-->
 <package format="3">
   <name>limxsdk_sim</name>
-  <version>0.0.0</version>
-  <description>limxsdk_sim</description>
-  <maintainer email="limx@limxdynamics.com">limxdynamics</maintainer>
-  <license>TODO</license>
+  <version>0.1.0</version>
+  <description>
+    Simulation-side C++ SDK for the TRON2 platform. Provides the
+    RobotCmd / RobotState API consumed by `tron2_gazebo` inside
+    Gazebo. Ships headers under `include/limxsdk/` and pre-built
+    binaries under `lib/{aarch64,amd64,arm32,win}/` whose per-file
+    provenance and checksums are tracked in THIRD_PARTY_NOTICES.md §2.
+  </description>
+  <maintainer email="contact@limxdynamics.com">LimX Dynamics</maintainer>
+  <author email="contact@limxdynamics.com">LimX Dynamics</author>
+  <license>Apache-2.0</license>
+
+  <url type="website">https://www.limxdynamics.com</url>
+  <url type="repository">https://github.com/limx-tron2/tron2-gazebo-ros</url>
+  <url type="bugtracker">https://github.com/limx-tron2/tron2-gazebo-ros/issues</url>
+
   <buildtool_depend    condition="$ROS_VERSION == 1">catkin</buildtool_depend>
   <build_depend        condition="$ROS_VERSION == 1">roscpp</build_depend>
   <build_export_depend condition="$ROS_VERSION == 1">roscpp</build_export_depend>

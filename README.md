@@ -1,6 +1,71 @@
+<!--
+  SPDX-FileCopyrightText: 2024-2026 LimX Dynamics Technology Co., Ltd.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 # TRON2 ROS 工作区说明（`~/limx_ws/src`）
 
 本目录是 TRON2 在 ROS Noetic 下的源码空间（catkin `src`），包含仿真侧与控制侧两类包。
+
+## License & attribution
+
+This repository is licensed under the **Apache License, Version 2.0**
+(see [`LICENSE`](LICENSE)). Both ROS packages declare
+`<license>Apache-2.0</license>` in their `package.xml`, consistent with
+the top-level LICENSE.
+
+Companion documents in this repository:
+
+- [`NOTICE`](NOTICE) — required attribution notice.
+- [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) — bundled SDK
+  binaries (§2), Gazebo / ROS runtime deps (§4), and documentation
+  media (§5). Rows still marked `⚠ TO CONFIRM` continue to block the
+  first public tag.
+- [`SECURITY.md`](SECURITY.md) — how to report a vulnerability;
+  private-IP handling policy for `limxsdk-sim/include/limxsdk/apibase.h`.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — `catkin_make` workflow,
+  no-CAD / no-binary policy, DCO sign-off.
+- [`CHANGELOG.md`](CHANGELOG.md) — release notes and the remaining
+  "Pending owner sign-off" list.
+
+## Scope
+
+**Included** in this repository:
+
+- `tron2_gazebo` — a Gazebo Classic 11 `gazebo_ros_control` plugin
+  (`Tron2HWSim`) that exposes a hybrid joint effort interface and
+  bridges to the TRON2 SDK RobotCmd / RobotState API. See
+  `tron2_gazebo/src/Tron2HWSim.cpp`.
+- `limxsdk-sim` — simulation-side C++ SDK. Public headers under
+  `limxsdk-sim/include/limxsdk/` plus pre-built binaries under
+  `limxsdk-sim/lib/{aarch64,amd64,arm32,win}/`.
+- Example worlds, launch files, and controller configs under
+  `tron2_gazebo/{worlds,launch,config}/`.
+- Reference GIFs and one deployment photo under `doc/`.
+
+**Not included** — by design:
+
+- **No vendor clearance** yet on the four bundled SDK binaries
+  (`limxsdk-sim/lib/*/liblimxsdk_sim.so`,
+  `limxsdk-sim/lib/win/limxsdk_sim.{dll,lib}`). Provenance,
+  SHA-256, and re-distribution license are pending sign-off
+  (`THIRD_PARTY_NOTICES.md` §2).
+- No control policies (`.onnx`, `.pt`, `.pth`, `.ckpt`).
+- No factory calibration values or per-serial calibration files.
+- No firmware or bootloader artifacts.
+- No motion / trajectory data (rosbags, MCAP, HDF5 captures).
+- No production-network IP addresses, hostnames, or credentials
+  (see `SECURITY.md`). The one private-IP literal in
+  `limxsdk-sim/include/limxsdk/apibase.h` (`10.192.1.2`) is a
+  documented RFC-1918 placeholder and is enforced by CI.
+- No customer-specific or site-specific configuration.
+
+For the deployment stack, model weights, and the real-robot SDK,
+see the sibling repositories in the `limx-tron2` organisation.
+
+---
+
+
 
 ## 1. 目录结构
 
@@ -165,4 +230,74 @@ roslaunch tron2_hw tron2_hw.launch robot_type:=SF_TRON2A robot_ip:=10.192.1.2
 
 ## 6. License
 
-[Apache 2.0](../tron2-rl-deploy-ros/LICENSE)
+> **⚠ TO CONFIRM.** The link that previously pointed at
+> `../tron2-rl-deploy-ros/LICENSE` is **not** a licence grant for
+> *this* repository — see the [License & attribution](#license--attribution)
+> section at the top of this file, `NOTICE`, and
+> `THIRD_PARTY_NOTICES.md` §1 for the authoritative status. Both
+> `tron2_gazebo/package.xml` and `limxsdk-sim/package.xml` still
+> declare non-open-source `<license>` values pending owner sign-off.
+
+---
+
+## Verification
+
+The commands below are the same ones CI runs (see
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml)); running
+them locally before opening a PR saves review round-trips.
+
+```bash
+# 1. Workspace build
+cd ~/limx_ws
+source /opt/ros/noetic/setup.bash
+catkin_make
+source devel/setup.bash
+
+# 2. package.xml well-formedness
+xmllint --noout tron2_gazebo/package.xml limxsdk-sim/package.xml
+
+# 3. Gazebo plugin descriptor
+xmllint --noout tron2_gazebo/tron2_hw_sim_plugins.xml
+
+# 4. Committed-binary deny-list (outside limxsdk-sim/lib/)
+git ls-files | grep -iE '\.(onnx|pt|pth|ckpt|so|dll|dylib|lib|whl|bag|mcap)$' | \
+    grep -v '^limxsdk-sim/lib/'
+
+# 5. Bundled SDK binary checksums (⚠ TO CONFIRM in THIRD_PARTY_NOTICES.md §2)
+sha256sum \
+  limxsdk-sim/lib/aarch64/liblimxsdk_sim.so \
+  limxsdk-sim/lib/amd64/liblimxsdk_sim.so \
+  limxsdk-sim/lib/arm32/liblimxsdk_sim.so \
+  limxsdk-sim/lib/win/limxsdk_sim.dll \
+  limxsdk-sim/lib/win/limxsdk_sim.lib
+
+# 6. Private-IP scan (allowlist: apibase.h placeholder)
+grep -RnE '\b(10|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\.[0-9]+\.[0-9]+\b' \
+     tron2_gazebo limxsdk-sim | \
+     grep -v 'limxsdk-sim/include/limxsdk/apibase.h' | \
+     grep -v '127\.0\.0\.1'
+```
+
+---
+
+## Cite & support
+
+If you use this simulation stack in academic or public work, please
+cite the repository:
+
+```
+@misc{limx_tron2_gazebo_ros_2026,
+  title  = {TRON2 Gazebo / ROS simulation},
+  author = {LimX Dynamics},
+  year   = {2026},
+  howpublished = {\url{https://github.com/limx-tron2/tron2-gazebo-ros}}
+}
+```
+
+- **Bug reports / feature requests:**
+  [GitHub Issues](https://github.com/limx-tron2/tron2-gazebo-ros/issues).
+- **Questions / integration help:**
+  [GitHub Discussions](https://github.com/limx-tron2/tron2-gazebo-ros/discussions).
+- **Security reports:** email `contact@limxdynamics.com`; see
+  [`SECURITY.md`](SECURITY.md).
+- **Company / commercial contact:** <https://www.limxdynamics.com>.

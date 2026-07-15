@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# CODEOWNERS for tron2-gazebo-ros
+#
+# Order matters: the LAST matching pattern wins for each file.
+# Replace the placeholder team handles below with real GitHub logins
+# / teams before enabling branch protection that requires code-owner
+# review.
+
+# Default owners: repo maintainers / meta files
+*                                       @limx-tron2/maintainers
+
+# Open-source scaffolding & policy
+/NOTICE                                 @limx-tron2/legal @limx-tron2/maintainers
+/THIRD_PARTY_NOTICES.md                 @limx-tron2/legal @limx-tron2/maintainers @limx-tron2/sdk
+/SECURITY.md                            @limx-tron2/security @limx-tron2/maintainers
+/CONTRIBUTING.md                        @limx-tron2/maintainers
+/CHANGELOG.md                           @limx-tron2/maintainers
+/README.md                              @limx-tron2/maintainers @limx-tron2/content
+
+# CI / templates
+/.github/                               @limx-tron2/maintainers
+
+# Documentation media (owner audit before merge)
+/doc/                                   @limx-tron2/content @limx-tron2/legal
+
+# tron2_gazebo — Gazebo plugin, control-path bridge
+/tron2_gazebo/                          @limx-tron2/robotics @limx-tron2/maintainers
+/tron2_gazebo/package.xml               @limx-tron2/legal @limx-tron2/robotics @limx-tron2/maintainers
+/tron2_gazebo/src/Tron2HWSim.cpp        @limx-tron2/robotics @limx-tron2/sdk
+
+# limxsdk-sim — simulation-side SDK
+/limxsdk-sim/                           @limx-tron2/sdk @limx-tron2/maintainers
+/limxsdk-sim/package.xml                @limx-tron2/legal @limx-tron2/sdk @limx-tron2/maintainers
+/limxsdk-sim/include/                   @limx-tron2/sdk
+/limxsdk-sim/include/limxsdk/apibase.h  @limx-tron2/security @limx-tron2/sdk
+
+# Bundled SDK binaries — extra legal + SDK review required
+/limxsdk-sim/lib/                       @limx-tron2/legal @limx-tron2/sdk @limx-tron2/security

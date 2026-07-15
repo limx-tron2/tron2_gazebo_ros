@@ -1,0 +1,24 @@
+TRON2 Gazebo / ROS simulation
+Copyright (c) 2024-2026 LimX Dynamics Inc.
+
+This product bundles a Gazebo hardware-simulation plugin
+(`tron2_gazebo`) and a simulation-side C++ SDK (`limxsdk-sim`) that
+bridges the plugin to the TRON2 SDK RobotCmd / RobotState API used by
+downstream control code.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you
+may not use these files except in compliance with the License. You may
+obtain a copy of the License in the LICENSE file at the root of this
+repository, or at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Both ROS packages in this repository — `tron2_gazebo` and `limxsdk-sim`
+— now declare `<license>Apache-2.0</license>` in their `package.xml`,
+consistent with the top-level LICENSE file.
+
+Third-party components, bundled SDK binaries (§2 of
+THIRD_PARTY_NOTICES.md), upstream references, and documentation media
+remain itemised in THIRD_PARTY_NOTICES.md. Rows still marked
+`⚠ TO CONFIRM` continue to block the first public tag until the
+responsible owners sign off.

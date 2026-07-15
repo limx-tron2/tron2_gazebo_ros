@@ -1,0 +1,63 @@
+# --- ROS 1 (catkin) / ROS 2 (colcon) build outputs ---
+build/
+install/
+log/
+devel/
+.catkin_tools/
+.catkin_workspace
+CATKIN_IGNORE
+COLCON_IGNORE
+
+# --- C++ / CMake build artifacts ---
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+*.o
+*.a
+*.obj
+*.exe
+compile_commands.json
+
+# --- Python bytecode / caches ---
+*.pyc
+*.pyo
+__pycache__/
+.pytest_cache/
+
+# --- editor / OS junk ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --- runtime deny-list (must never be committed to this repo) ---
+# NOTE: shared libraries under limxsdk-sim/lib/ are intentionally
+# kept, but their provenance is ⚠ TO CONFIRM in THIRD_PARTY_NOTICES.md
+# — no *new* binaries should be added anywhere in the tree until that
+# clearance is done.
+*.onnx
+*.pt
+*.pth
+*.ckpt
+*.bag
+*.mcap
+*.whl
+
+# Bundled shared libraries live only under limxsdk-sim/lib/. Anywhere
+# else in the tree they must not be committed.
+/tron2_gazebo/**/*.so
+/tron2_gazebo/**/*.dll
+/tron2_gazebo/**/*.dylib
+/tron2_gazebo/**/*.lib
+
+# --- generated / scratch ---
+/tmp/
+/out/
+*.log

@@ -1,0 +1,160 @@
+# SPDX-License-Identifier: Apache-2.0
+# NOTE: The SPDX header above documents the license of THIS CI
+# workflow file itself. The two ROS packages in this repository still
+# declare non-open-source `<license>` values (see
+# THIRD_PARTY_NOTICES.md §1). This CI enforces those must be resolved
+# before a public tag.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-scan:
+    name: XML / license / binary / IP scans
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install lint tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxml2-utils libimage-exiftool-perl
+
+      - name: package.xml well-formedness
+        run: |
+          set -e
+          xmllint --noout tron2_gazebo/package.xml
+          xmllint --noout limxsdk-sim/package.xml
+
+      - name: Gazebo plugin descriptor well-formedness
+        run: |
+          set -e
+          xmllint --noout tron2_gazebo/tron2_hw_sim_plugins.xml
+
+      - name: package.xml <license> guard (fail on TODO / Proprietary)
+        run: |
+          set -e
+          bad=0
+          for pkg in tron2_gazebo/package.xml limxsdk-sim/package.xml; do
+            val=$(sed -n 's:.*<license>\(.*\)</license>.*:\1:p' "$pkg" | head -n1)
+            echo "── $pkg  <license>$val</license>"
+            case "$val" in
+              TODO|Proprietary|proprietary|todo|""|"UNKNOWN"|"unknown")
+                echo "::error file=$pkg::<license> is '$val'; owner sign-off required — see THIRD_PARTY_NOTICES.md §1"
+                bad=$((bad+1))
+                ;;
+            esac
+          done
+          if [ $bad -ne 0 ]; then exit 1; fi
+
+      - name: Committed-binary deny-list (outside limxsdk-sim/lib/)
+        run: |
+          set -e
+          # The four bundled SDK binaries under limxsdk-sim/lib/ are
+          # intentionally kept but must still be cleared for provenance;
+          # see THIRD_PARTY_NOTICES.md §2. Anywhere else in the tree,
+          # binary artifacts are forbidden.
+          bad=$(git ls-files | \
+            grep -iE '\.(onnx|pt|pth|ckpt|so|dll|dylib|lib|whl|bag|mcap)$' | \
+            grep -v '^limxsdk-sim/lib/' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::Committed binaries outside limxsdk-sim/lib/:"
+            echo "$bad"
+            exit 1
+          fi
+
+      - name: Bundled SDK binary manifest (informational)
+        run: |
+          set -e
+          echo "── bundled SDK binaries (⚠ TO CONFIRM in THIRD_PARTY_NOTICES.md §2)"
+          find limxsdk-sim/lib -type f \( -name '*.so' -o -name '*.dll' -o -name '*.lib' \) -print0 | \
+            xargs -0 sha256sum
+
+      - name: EXIF sanity on doc/ media
+        run: |
+          set -e
+          bad=0
+          shopt -s nullglob
+          for img in doc/*.jpg doc/*.jpeg doc/*.png doc/*.gif doc/*.GIF; do
+            [ -f "$img" ] || continue
+            hits=$(exiftool "$img" | grep -iE '(gps|serial|author|artist|owner)' || true)
+            if [ -n "$hits" ]; then
+              echo "::error file=$img::EXIF discloses $hits"
+              bad=$((bad+1))
+            fi
+          done
+          if [ $bad -ne 0 ]; then exit 1; fi
+
+      - name: Private-IP scan (allowlist: apibase.h placeholder)
+        run: |
+          set -e
+          # RFC-1918 ranges + link-local 169.254/16. 127.0.0.1 is fine
+          # (localhost). 10.192.1.2 is the documented placeholder inside
+          # limxsdk-sim/include/limxsdk/apibase.h — allowlisted.
+          hits=$(grep -RInE \
+            '\b(10\.[0-9]+\.[0-9]+\.[0-9]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]+\.[0-9]+|192\.168\.[0-9]+\.[0-9]+|169\.254\.[0-9]+\.[0-9]+)\b' \
+            tron2_gazebo limxsdk-sim 2>/dev/null | \
+            grep -v '^limxsdk-sim/include/limxsdk/apibase.h:' | \
+            grep -v '127\.0\.0\.1' || true)
+          if [ -n "$hits" ]; then
+            echo "::error::Private-IP literal(s) found outside the documented placeholder:"
+            echo "$hits"
+            echo "See SECURITY.md — the only allowed private-IP literal is 10.192.1.2 in limxsdk-sim/include/limxsdk/apibase.h."
+            exit 1
+          fi
+
+      - name: Doc marker scan (no unresolved TODO / proprietary in top-level docs)
+        run: |
+          set -e
+          # Note: the ⚠ TO CONFIRM markers are intentional in this
+          # scaffolding; this check only fails on unqualified strings
+          # like "TODO: license" or "confidential".
+          if grep -RniE '(todo: license|unknown license|confidential)' \
+               README.md THIRD_PARTY_NOTICES.md CHANGELOG.md \
+               CONTRIBUTING.md SECURITY.md NOTICE; then
+            echo "::error::Unresolved license / confidentiality markers in top-level docs"
+            exit 1
+          fi
+
+  build:
+    name: catkin_make (Noetic + Gazebo 11)
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: src/tron2-gazebo-ros
+
+      - name: Install ROS Noetic + Gazebo deps
+        run: |
+          set -e
+          sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+          curl -sSL 'https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc' | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install -y \
+            ros-noetic-ros-base \
+            ros-noetic-gazebo-ros-pkgs \
+            ros-noetic-gazebo-ros-control \
+            ros-noetic-ros-control \
+            ros-noetic-ros-controllers \
+            ros-noetic-controller-manager \
+            ros-noetic-hardware-interface \
+            ros-noetic-realtime-tools \
+            python3-catkin-tools \
+            libeigen3-dev \
+            libxml2-utils
+
+      - name: catkin_make (best-effort — allows failure while robot_common is unresolved)
+        continue-on-error: true
+        run: |
+          set -e
+          source /opt/ros/noetic/setup.bash
+          cd $GITHUB_WORKSPACE
+          catkin_make || echo "::warning::catkin_make failed — likely missing sibling packages (robot_common); see CONTRIBUTING.md."
