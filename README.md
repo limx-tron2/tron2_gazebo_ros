@@ -3,9 +3,13 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 
-# TRON2 ROS 工作区说明（`~/limx_ws/src`）
+[English](README.md) | [中文](README_zh-CN.md)
 
-本目录是 TRON2 在 ROS Noetic 下的源码空间（catkin `src`），包含仿真侧与控制侧两类包。
+# TRON2 ROS workspace (`~/limx_ws/src`)
+
+This directory is the TRON2 source space (catkin `src`) for ROS Noetic. It
+contains two families of packages: those on the simulation side and those on
+the control side.
 
 ## License & attribution
 
@@ -27,6 +31,13 @@ Companion documents in this repository:
   no-CAD / no-binary policy, DCO sign-off.
 - [`CHANGELOG.md`](CHANGELOG.md) — release notes and the remaining
   "Pending owner sign-off" list.
+
+> **⚠ TO CONFIRM.** Any link that previously pointed at
+> `../tron2-rl-deploy-ros/LICENSE` is **not** a licence grant for
+> *this* repository — the section above, `NOTICE`, and
+> `THIRD_PARTY_NOTICES.md` §1 are the authoritative status. Both
+> `tron2_gazebo/package.xml` and `limxsdk-sim/package.xml` still
+> declare non-open-source `<license>` values pending owner sign-off.
 
 ## Scope
 
@@ -56,8 +67,8 @@ Companion documents in this repository:
 - No motion / trajectory data (rosbags, MCAP, HDF5 captures).
 - No production-network IP addresses, hostnames, or credentials
   (see `SECURITY.md`). The one private-IP literal in
-  `limxsdk-sim/include/limxsdk/apibase.h` (`10.192.1.2`) is a
-  documented RFC-1918 placeholder and is enforced by CI.
+  `limxsdk-sim/include/limxsdk/apibase.h` (`10.192.1.2`, an internal
+  example) is a documented RFC-1918 placeholder and is enforced by CI.
 - No customer-specific or site-specific configuration.
 
 For the deployment stack, model weights, and the real-robot SDK,
@@ -65,35 +76,35 @@ see the sibling repositories in the `limx-tron2` organisation.
 
 ---
 
+## 1. Directory layout
 
-
-## 1. 目录结构
-
-当前建议结构如下：
+The recommended layout is:
 
 ```text
 ~/limx_ws/src
-├── CMakeLists.txt                 # catkin 顶层入口（通常为软链接）
-├── robot-description              # 机器人模型描述包（独立放在 src 一级）
-├── limxsdk-lowlevel               # 低层 SDK 包（独立放在 src 一级）
-├── tron2-gazebo-ros               # 仿真相关包集合
+├── CMakeLists.txt                 # catkin top-level entry (usually a symlink)
+├── robot-description              # robot model description package (top level under src)
+├── limxsdk-lowlevel               # low-level SDK package (top level under src)
+├── tron2-gazebo-ros               # simulation-side package collection
 │   ├── limxsdk-sim
 │   └── tron2_gazebo
-└── tron2-rl-deploy-ros            # 控制/部署相关包集合
+└── tron2-rl-deploy-ros            # control / deployment package collection
     ├── onnxruntime_sdk
     ├── robot_common
     ├── tron2_controllers
     └── tron2_hw
 ```
 
-> 注意：catkin 支持递归发现包，因此子目录分组不会影响编译，只要每个 ROS 包内有合法 `package.xml` 与 `CMakeLists.txt`。
+> Note: catkin discovers packages recursively, so grouping into
+> subdirectories does not affect the build as long as each ROS package
+> contains a valid `package.xml` and `CMakeLists.txt`.
 
-## 2. 环境要求
+## 2. Requirements
 
 - Ubuntu 20.04
-- ROS Noetic（建议 `ros-noetic-desktop-full`）
-- Gazebo 11（ROS Noetic 默认）
-- 常见依赖（按需补齐）：
+- ROS Noetic (`ros-noetic-desktop-full` is recommended)
+- Gazebo 11 (default for ROS Noetic)
+- Common dependencies (install as needed):
 
 ```bash
 sudo apt-get update
@@ -109,39 +120,41 @@ sudo apt-get install -y \
   libeigen3-dev
 ```
 
-## 3. 创建工作空间
+## 3. Workspace setup
 
-可以按照以下步骤，创建一个算法开发工作空间：
+Set up an algorithm-development workspace as follows:
 
-- 打开一个 Bash 终端。
+- Open a Bash terminal.
 
-- 创建一个新目录来存放工作空间。例如，可以在用户的主目录下创建一个名为“limx_ws”的目录：
+- Create a new directory to hold the workspace. For example, create a
+  directory called "limx_ws" under your home directory:
 
   ```
   mkdir -p ~/limx_ws/src
   ```
 
-- 下载运动控制开发接口：
+- Download the motion-control development interface:
 
   ```
   cd ~/limx_ws/src
   git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
   ```
 
-- 下载 Gazebo 仿真器：
+- Download the Gazebo simulator:
 
   ```
   cd ~/limx_ws/src
   git clone https://github.com/limxdynamics/tron1-gazebo-ros.git
   ```
 
-- 下载机器人模型描述文件
+- Download the robot model description:
 
   ```
   cd ~/limx_ws/src
   git clone https://github.com/limxdynamics/robot-description.git
   ```
-在工作区根目录执行：
+
+Then, from the workspace root:
 
 ```bash
 cd ~/limx_ws
@@ -149,94 +162,89 @@ source /opt/ros/noetic/setup.bash
 catkin_make
 ```
 
-编译成功后建议加载环境：
+After a successful build, source the environment:
 
 ```bash
 source ~/limx_ws/devel/setup.bash
 ```
 
-## 4. 运行示例
+## 4. Running the examples
 
-### 4.1 启动仿真（完整部署）
+### 4.1 Launch the simulation (full deployment)
 
 ```bash
 cd ~/limx_ws
 source /opt/ros/noetic/setup.bash
 source devel/setup.bash
-# 启动包含 Gazebo 场景、硬件节点和控制器的完整仿真
+# Bring up a full simulation with the Gazebo scene, hardware node, and controller.
 roslaunch tron2_hw tron2_hw_sim.launch robot_type:=SF_TRON2A
 ```
 
-`robot_type` 可按你的配置切换（例如 `SF_TRON2A` / `WF_TRON2A`）。
+`robot_type` can be switched to match your configuration
+(for example `SF_TRON2A` / `WF_TRON2A`).
 
+### 4.2 Controller only (simulation mode)
 
-### 4.2 仅启动控制器（仿真模式）
-
-如果你已经手动启动了 Gazebo 场景，可以只启动硬件节点和控制器：
+If you have already started the Gazebo scene manually, you can bring up
+just the hardware node and the controller:
 
 ```bash
 roslaunch tron2_hw tron2_controller_sim.launch robot_type:=SF_TRON2A
 ```
 
-### 4.3 实物部署
+### 4.3 Real-hardware deployment
 
 ```bash
 roslaunch tron2_hw tron2_hw.launch robot_type:=SF_TRON2A robot_ip:=10.192.1.2
 ```
 
-## 5. 仿真与实机逻辑说明（重要）
+## 5. Simulation vs real-hardware logic (important)
 
-结论：**核心控制链路逻辑一致**，都是：
+Bottom line: **the core control chain is identical**, namely:
 
-- `tron2_hw_node`（`Tron2HW`） -> `RobotHWLoop` -> `controller_manager` -> `tron2_controller`
+- `tron2_hw_node` (`Tron2HW`) -> `RobotHWLoop` -> `controller_manager` -> `tron2_controller`
 
-但两者有输入侧差异：
+The two paths differ on the input side:
 
-- 仿真（`tron2_hw_sim.launch`）默认还会发 `/cmd_vel` 和 `/tron2_controller/set_mode`。
-- 实机（`tron2_hw.launch`）主要走 SDK 订阅的通道。
+- Simulation (`tron2_hw_sim.launch`) additionally publishes `/cmd_vel` and
+  `/tron2_controller/set_mode` by default.
+- Real hardware (`tron2_hw.launch`) primarily uses the channels that the
+  SDK subscribes to.
 
-## 6. 控制参数位置
+## 6. Configuration file locations
 
-主要控制参数位于：
+The main control parameters live at:
 
 - `tron2-rl-deploy-ros/tron2_controllers/config/SF_TRON2A/params.yaml`
 - `tron2-rl-deploy-ros/tron2_controllers/config/WF_TRON2A/params.yaml`
 
-## 7. 效果展示
+## 7. Screenshots / GIFs
 
-### 7.1 仿真部署
+### 7.1 Simulation deployment
 
 ![SF Gazebo](doc/sfgazebo-ezgif.com-video-to-gif-converter.gif)
 ![WF Gazebo](doc/wfgazebo.gif)
 
-### 7.2 实机部署
+### 7.2 Real-hardware deployment
 
-实机部署时请悬挂启动控制器
+Suspend the robot before starting the controller during a real-hardware
+deployment.
 
 ![Deploy](doc/deploy.jpg)
 
 ![SF](doc/sf.GIF)
 ![WF](doc/wf.GIF)
 
-## 8. 常见问题
+## 8. FAQ
 
-- 启动时报找不到包：
-  - 确认已执行 `source /opt/ros/noetic/setup.bash`
-  - 确认已执行 `source ~/limx_ws/devel/setup.bash`
-- 修改目录后编译异常：
-  - 在 `~/limx_ws` 下重新执行 `catkin_make`
-- Gazebo 插件/控制器加载失败：
-  - 先确认 `tron2_gazebo`、`tron2_hw`、`tron2_controllers`均已成功编译
-
-## 6. License
-
-> **⚠ TO CONFIRM.** The link that previously pointed at
-> `../tron2-rl-deploy-ros/LICENSE` is **not** a licence grant for
-> *this* repository — see the [License & attribution](#license--attribution)
-> section at the top of this file, `NOTICE`, and
-> `THIRD_PARTY_NOTICES.md` §1 for the authoritative status. Both
-> `tron2_gazebo/package.xml` and `limxsdk-sim/package.xml` still
-> declare non-open-source `<license>` values pending owner sign-off.
+- Package not found at launch:
+  - Confirm you have run `source /opt/ros/noetic/setup.bash`.
+  - Confirm you have run `source ~/limx_ws/devel/setup.bash`.
+- Build errors after moving directories around:
+  - Re-run `catkin_make` under `~/limx_ws`.
+- Gazebo plugin / controller fails to load:
+  - Confirm that `tron2_gazebo`, `tron2_hw`, and `tron2_controllers`
+    have all built successfully.
 
 ---
 
