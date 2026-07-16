@@ -50,6 +50,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   LICENSE. The two `⚠ TO CONFIRM` comments have been removed.
   `NOTICE` and `THIRD_PARTY_NOTICES.md §1` reflect the resolution.
 
+### Resolved (2026-07-16)
+- **Private-IP handling** — resolved 2026-07-16 per owner decision.
+  All Markdown / YAML command examples now use `<robot-ip>` as a
+  placeholder token. The `limxsdk-sim/include/limxsdk/apibase.h`
+  Doxygen comment retains the literal `10.192.1.2` as a
+  documentation example only, declared in `SECURITY.md`. CI's
+  private-IP scan continues to allowlist that one location.
+
 ### Pending owner sign-off (blocks first public tag)
 - **Bundled SDK binaries** — provenance, SHA-256 checksums, and
   re-distribution license for
@@ -59,10 +67,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `limxsdk-sim/lib/win/limxsdk_sim.dll`, and
   `limxsdk-sim/lib/win/limxsdk_sim.lib`
   (`THIRD_PARTY_NOTICES.md` §2).
-- **Private-IP handling** — the `10.192.1.2` literal in
-  `limxsdk-sim/include/limxsdk/apibase.h` must remain a documented
-  RFC-1918 placeholder; confirm it is not a production-network
-  address (`SECURITY.md`).
 - **`doc/` media review** — EXIF strip and content review of
   `doc/deploy.jpg`, `doc/sf.GIF`, `doc/sfgazebo-*.gif`, `doc/wf.GIF`,
   `doc/wfgazebo.gif` (`THIRD_PARTY_NOTICES.md` §5).

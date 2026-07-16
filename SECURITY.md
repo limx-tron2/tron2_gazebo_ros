@@ -28,11 +28,18 @@ repositories, not here.
 
 ## Known placeholders and internal identifiers
 
-- `limxsdk-sim/include/limxsdk/apibase.h` contains the private-IP
-  literal **`10.192.1.2`** as a default robot address. This is a
-  placeholder for an RFC-1918 network and must not be replaced with
-  a production-network address. CI scans for any other private-IP
-  literal outside this file and fails the build on match.
+- `limxsdk-sim/include/limxsdk/apibase.h:35` contains, as a
+  documentation example inside a C++ Doxygen comment, the literal
+  `10.192.1.2`. This value is a documentation example only; it is
+  not the address of any LimX production network. The header comment
+  says verbatim: "For simulation, it is typically set to '127.0.0.1',
+  while for a real robot, it may be set to '10.192.1.2'." Downstream
+  users must substitute their robot's actual IP at runtime.
+- Command examples in `README.md`, `README_zh-CN.md`, and
+  `tron2_hw/*` launch files use `<robot-ip>` as a placeholder token
+  — substitute your robot's IP before running.
+- CI (`.github/workflows/ci.yml`) rejects any new private-IP literal
+  outside `apibase.h`'s single documented instance.
 - `doc/deploy.jpg` and the `doc/*.GIF` / `doc/*.gif` captures are
   subject to a manual EXIF and content review before every release
   (see [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) §5).

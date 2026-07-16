@@ -5,6 +5,12 @@
 
 [English](README.md) | [中文](README_zh-CN.md)
 
+> **Distribution:** the primary open-source copy of this repository is
+> hosted at
+> [`github.com/limx-tron2/tron2-gazebo-ros`](https://github.com/limx-tron2/tron2-gazebo-ros).
+> The internal GitLab at `192.168.2.65:8080/rl/poc/tron/tron2_open_source/tron2-gazebo-ros`
+> is a private mirror used for LimX-internal development only.
+
 # TRON2 ROS workspace (`~/limx_ws/src`)
 
 This directory is the TRON2 source space (catkin `src`) for ROS Noetic. It
@@ -65,10 +71,14 @@ Companion documents in this repository:
 - No factory calibration values or per-serial calibration files.
 - No firmware or bootloader artifacts.
 - No motion / trajectory data (rosbags, MCAP, HDF5 captures).
-- No production-network IP addresses, hostnames, or credentials
-  (see `SECURITY.md`). The one private-IP literal in
-  `limxsdk-sim/include/limxsdk/apibase.h` (`10.192.1.2`, an internal
-  example) is a documented RFC-1918 placeholder and is enforced by CI.
+- **No production-network robot IP addresses.** Command examples ship
+  `<robot-ip>` as a placeholder token — substitute your robot's IP
+  before running. The header
+  `limxsdk-sim/include/limxsdk/apibase.h` retains a documentation
+  example literal `10.192.1.2` describing typical real-hardware
+  usage; this is a documentation value only and is not the address
+  of any LimX production network. See [`SECURITY.md`](SECURITY.md)
+  for the private-IP handling policy.
 - No customer-specific or site-specific configuration.
 
 For the deployment stack, model weights, and the real-robot SDK,
@@ -195,7 +205,7 @@ roslaunch tron2_hw tron2_controller_sim.launch robot_type:=SF_TRON2A
 ### 4.3 Real-hardware deployment
 
 ```bash
-roslaunch tron2_hw tron2_hw.launch robot_type:=SF_TRON2A robot_ip:=10.192.1.2
+roslaunch tron2_hw tron2_hw.launch robot_type:=SF_TRON2A robot_ip:=<robot-ip>
 ```
 
 ## 5. Simulation vs real-hardware logic (important)

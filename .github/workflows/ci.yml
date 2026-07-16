@@ -97,7 +97,7 @@ jobs:
         run: |
           set -e
           # RFC-1918 ranges + link-local 169.254/16. 127.0.0.1 is fine
-          # (localhost). 10.192.1.2 is the documented placeholder inside
+          # (localhost). <robot-ip> is the documented placeholder inside
           # limxsdk-sim/include/limxsdk/apibase.h — allowlisted.
           hits=$(grep -RInE \
             '\b(10\.[0-9]+\.[0-9]+\.[0-9]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]+\.[0-9]+|192\.168\.[0-9]+\.[0-9]+|169\.254\.[0-9]+\.[0-9]+)\b' \
@@ -107,7 +107,7 @@ jobs:
           if [ -n "$hits" ]; then
             echo "::error::Private-IP literal(s) found outside the documented placeholder:"
             echo "$hits"
-            echo "See SECURITY.md — the only allowed private-IP literal is 10.192.1.2 in limxsdk-sim/include/limxsdk/apibase.h."
+            echo "See SECURITY.md — the only allowed private-IP literal is <robot-ip> in limxsdk-sim/include/limxsdk/apibase.h."
             exit 1
           fi
 

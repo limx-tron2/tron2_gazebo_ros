@@ -5,6 +5,11 @@
 
 [English](README.md) | [中文](README_zh-CN.md)
 
+> **分发说明：** 本仓库的开源主副本托管于
+> [`github.com/limx-tron2/tron2-gazebo-ros`](https://github.com/limx-tron2/tron2-gazebo-ros)。
+> 内部 GitLab `192.168.2.65:8080/rl/poc/tron/tron2_open_source/tron2-gazebo-ros`
+> 仅作为 LimX 内部开发使用的私有镜像。
+
 # TRON2 ROS 工作区说明（`~/limx_ws/src`）
 
 本目录是 TRON2 在 ROS Noetic 下的源码空间（catkin `src`），包含仿真侧与控制侧两类包。
@@ -59,10 +64,12 @@
 - 工厂标定数据或按机号定制的标定文件。
 - 固件或 bootloader 产物。
 - 运动 / 轨迹数据（rosbag、MCAP、HDF5 采集数据）。
-- 生产环境的 IP 地址、主机名或凭据（见 `SECURITY.md`）。
-  `limxsdk-sim/include/limxsdk/apibase.h` 中出现的唯一
-  私网 IP 字面量 `10.192.1.2`（内部示例）是文档化的
-  RFC-1918 占位符，并由 CI 强制校验。
+- **不包含任何生产环境的机器人 IP 地址。** 命令示例统一使用
+  `<robot-ip>` 作为占位符 token，运行前请替换为你实际的机器人 IP。
+  头文件 `limxsdk-sim/include/limxsdk/apibase.h` 中保留字面量
+  `10.192.1.2` 作为描述典型真机使用场景的文档示例；该值仅为
+  文档示例，并非任何 LimX 生产网络的地址。私网 IP 处理策略详见
+  [`SECURITY.md`](SECURITY.md)。
 - 客户特定或场地特定的配置。
 
 部署栈、模型权重与实机 SDK 请参考 `limx-tron2` 组织下的兄弟仓库。
@@ -184,7 +191,7 @@ roslaunch tron2_hw tron2_controller_sim.launch robot_type:=SF_TRON2A
 ### 4.3 实物部署
 
 ```bash
-roslaunch tron2_hw tron2_hw.launch robot_type:=SF_TRON2A robot_ip:=10.192.1.2
+roslaunch tron2_hw tron2_hw.launch robot_type:=SF_TRON2A robot_ip:=<robot-ip>
 ```
 
 ## 5. 仿真与实机逻辑说明（重要）
