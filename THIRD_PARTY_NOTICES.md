@@ -36,25 +36,31 @@ own provenance / re-distribution status is tracked in §2.
 `limxsdk-sim/CMakeLists.txt` and consumed at runtime by
 `tron2_gazebo/src/Tron2HWSim.cpp`.
 
-| Path | Kind | Approx. size | Provenance | Re-distribution |
-|------|------|--------------|------------|-----------------|
-| `limxsdk-sim/lib/aarch64/liblimxsdk_sim.so` | Shared library (Linux, aarch64) | 10.45 MB | ⚠ TO CONFIRM | ⚠ TO CONFIRM |
-| `limxsdk-sim/lib/amd64/liblimxsdk_sim.so`   | Shared library (Linux, x86_64) | 11.32 MB | ⚠ TO CONFIRM | ⚠ TO CONFIRM |
-| `limxsdk-sim/lib/arm32/liblimxsdk_sim.so`   | Shared library (Linux, armhf)  |  9.59 MB | ⚠ TO CONFIRM | ⚠ TO CONFIRM |
-| `limxsdk-sim/lib/win/limxsdk_sim.dll`       | Shared library (Windows)       |  5.46 MB | ⚠ TO CONFIRM | ⚠ TO CONFIRM |
-| `limxsdk-sim/lib/win/limxsdk_sim.lib`       | Import library (Windows)       |  0.15 MB | ⚠ TO CONFIRM | ⚠ TO CONFIRM |
+| Path | Kind (`file` output) | Size (bytes) | SHA-256 | Provenance | Re-distribution |
+|------|----------------------|-------------:|---------|------------|-----------------|
+| `limxsdk-sim/lib/aarch64/liblimxsdk_sim.so` | ELF 64-bit LSB shared object, ARM aarch64, GNU/Linux, dynamically linked | 10 449 192 | `75382fa96043a1205bf9ed8649f0a433231f91239f44e46565c8646b9727258f` | ⚠ TO CONFIRM | ⚠ TO CONFIRM |
+| `limxsdk-sim/lib/amd64/liblimxsdk_sim.so`   | ELF 64-bit LSB shared object, x86-64, GNU/Linux, dynamically linked     | 11 319 848 | `a133318ff2b1b98cbb84401160facbdc6c58e5065ea68b09056678ccd8c6fa76` | ⚠ TO CONFIRM | ⚠ TO CONFIRM |
+| `limxsdk-sim/lib/arm32/liblimxsdk_sim.so`   | ELF 32-bit LSB shared object, ARM, EABI5, GNU/Linux, dynamically linked |  9 587 220 | `6b970a61a457ae0b32573a78c69703843e83bbf026ae6953c5f4114aedd10450` | ⚠ TO CONFIRM | ⚠ TO CONFIRM |
+| `limxsdk-sim/lib/win/limxsdk_sim.dll`       | PE32+ executable (DLL) x86-64, MS Windows                               |  5 464 064 | `c21ba55f7126f2a46b6e3d74f69aa23d1257b85712621ed97b57f1c2751835e7` | ⚠ TO CONFIRM | ⚠ TO CONFIRM |
+| `limxsdk-sim/lib/win/limxsdk_sim.lib`       | Current ar archive (Windows import library)                             |    151 224 | `a315f4c8e6a5dd50c8a2bc47930c40354c617b8b854b356fbbe1b54abf969eea` | ⚠ TO CONFIRM | ⚠ TO CONFIRM |
+
+Evidence collected 2026-07-16: SHA-256 digests were computed by
+`sha256sum` on the tracked working-tree files (see the reproduce command
+in §2.1 below); file-type strings are the exact `file(1)` output. These
+facts are agent-collected evidence, not a rights determination — the two
+right-most columns remain `⚠ TO CONFIRM` pending SDK-owner sign-off.
 
 **Owner action required.** For each binary the SDK owner must:
 
 1. Publish the source repository / release URL, commit / tag, and
    build reproducer used to produce the artifact.
-2. Attach a SHA-256 checksum and record it below.
+2. Confirm the SHA-256 recorded above matches an authorised build.
 3. State the license under which the binary may be re-distributed
    (must be compatible with the top-level license chosen in §1).
 4. Confirm that the binary contains no third-party code with
    incompatible redistribution terms.
 
-Recommended checksum command:
+### 2.1 Reproduce the evidence
 
 ```bash
 sha256sum \
@@ -63,9 +69,14 @@ sha256sum \
   limxsdk-sim/lib/arm32/liblimxsdk_sim.so \
   limxsdk-sim/lib/win/limxsdk_sim.dll \
   limxsdk-sim/lib/win/limxsdk_sim.lib
+file  limxsdk-sim/lib/aarch64/liblimxsdk_sim.so \
+      limxsdk-sim/lib/amd64/liblimxsdk_sim.so \
+      limxsdk-sim/lib/arm32/liblimxsdk_sim.so \
+      limxsdk-sim/lib/win/limxsdk_sim.dll \
+      limxsdk-sim/lib/win/limxsdk_sim.lib
 ```
 
-Until these five rows are filled in and cleared, this repository
+Until the two `⚠ TO CONFIRM` columns are cleared, this repository
 cannot be published under any open-source license.
 
 ---
@@ -76,10 +87,11 @@ Header files author-owned by LimX Dynamics. Their license follows the
 resolution of §1. They declare the runtime C++ API consumed by
 `tron2_gazebo`. Notes:
 
-- `limxsdk-sim/include/limxsdk/apibase.h` contains a private-IP
-  literal (`10.192.1.2`) used as a default placeholder. See
-  [`SECURITY.md`](SECURITY.md) — this must remain a placeholder and
-  is checked in CI.
+- `limxsdk-sim/include/limxsdk/apibase.h` retains a documentation
+  example literal `10.192.1.2` in a Doxygen comment (see
+  `SECURITY.md`). Command examples in shipped documentation use
+  `<robot-ip>` as a placeholder token. Both are agent-cleared per
+  the 2026-07-16 owner decision.
 
 ---
 
